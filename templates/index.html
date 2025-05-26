@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cryptography Tool</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #6b7280, #a5b4fc);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crypto-container {
+      max-width: 900px;
+      margin: auto;
+      padding: 30px;
+      background: linear-gradient(145deg, #ffffff, #e0e7ff);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 16px;
+      transition: transform 0.3s ease;
+    }
+    .crypto-container:hover {
+      transform: translateY(-5px);
+    }
+    .textareas-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 20px 0;
+    }
+    .crypto-textarea {
+      width: 48%;
+      min-height: 160px;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #4f46e5;
+      border-radius: 12px;
+      resize: vertical;
+      background-color: #f8fafc;
+      transition: border-color 0.3s ease, transform 0.5s ease, opacity 0.5s ease;
+      position: relative;
+    }
+    .crypto-textarea:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    }
+    .input-left {
+      margin-top: -20px;
+    }
+    .input-right {
+      margin-bottom: -20px;
+    }
+    .input-right textarea {
+      pointer-events: none; /* Prevent interaction except viewing */
+    }
+    .swap-button {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .swap-button:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: translateX(-50%) scale(1.1);
+    }
+    .shift-input {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e7ff;
+    }
+    .form-label {
+      color: #1e40af;
+      font-weight: 600;
+    }
+    .form-control {
+      border: 2px solid #4f46e5;
+      border-radius: 8px;
+      transition: border-color 0.3s ease;
+    }
+    .form-control:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    }
+    /* Animation for swapping */
+    .crypto-textarea.swapping-left {
+      transform: translateX(calc(100% + 40px));
+      opacity: 0.7;
+    }
+    .crypto-textarea.swapping-right {
+      transform: translateX(calc(-100% - 40px));
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="crypto-container">
+    <div class="textareas-row">
+      <textarea id="input1" class="crypto-textarea input-left" placeholder="Encrypt here..."></textarea>
+      <button class="swap-button" onclick="swapInputs()">⇆</button>
+      <textarea id="input2" class="crypto-textarea input-right" placeholder="Encryption output..." readonly></textarea>
+    </div>
+
+    <div class="shift-input">
+      <label for="shift" class="form-label">Shift Key:</label>
+      <input type="number" id="shift" class="form-control" placeholder="Enter shift key">
+    </div>
+  </div>
+
+  <script>
+    let isEncryptMode = true; // Track whether in encrypt or decrypt mode
+
+    function swapInputs() {
+      const input1 = document.getElementById('input1');
+      const input2 = document.getElementById('input2');
+
+      // Add swapping classes for animation
+      input1.classList.add('swapping-left');
+      input2.classList.add('swapping-right');
+
+      // Delay to allow animation to play
+      setTimeout(() => {
+        // Toggle placeholders based on mode
+        if (isEncryptMode) {
+          input1.placeholder = 'Decrypt here...';
+          input2.placeholder = 'Decryption output...';
+        } else {
+          input1.placeholder = 'Encrypt here...';
+          input2.placeholder = 'Encryption output...';
+        }
+
+        // Toggle mode
+        isEncryptMode = !isEncryptMode;
+
+        // Remove animation classes
+        input1.classList.remove('swapping-left');
+        input2.classList.remove('swapping-right');
+      }, 500);
+    }
+  </script>
+</body>
+</html>

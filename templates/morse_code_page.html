@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morse Code Converter</title>
+  <link rel="icon" href="data:,"> <!-- Suppress favicon.ico requests -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #6b7280, #a5b4fc);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crypto-container {
+      max-width: 800px;
+      margin: auto;
+      padding: 40px;
+      background: linear-gradient(145deg, #ffffff, #e0e7ff);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      transition: transform 0.3s ease;
+    }
+    .crypto-container:hover {
+      transform: translateY(-5px);
+    }
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .crypto-textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #4f46e5;
+      border-radius: 12px;
+      resize: vertical;
+      background-color: #f8fafc;
+      transition: border-color 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .crypto-textarea:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+    }
+    .btn-convert {
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      transition: background 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    .btn-convert:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: scale(1.05);
+    }
+    .audio-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    audio {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="crypto-container">
+    <div class="header-container">
+      <h1 style="color: #1e40af; font-weight: 600;">Morse Code Converter</h1>
+      <i class="bi bi-headphones" style="font-size: 1.8rem; color: #1e40af;"></i>
+    </div>
+    <form method="POST" action="{{url_for('morse')}}">
+      <textarea name="input_text" class="crypto-textarea" placeholder="Enter text to convert to Morse code...">{{ input_text }}</textarea>
+      <button type="submit" name="convert" value="convert" class="btn btn-convert">Convert</button>
+      {% if audio_file %}
+      <div class="audio-container">
+        <p>Listen to your Morse code:</p>
+        <audio controls>
+          <source src="{{ url_for('serve_audio') }}" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</body>
+</html>

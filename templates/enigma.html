@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enigma Cipher Tool</title>
+  <link rel="icon" href="data:,"> <!-- Suppress favicon.ico requests -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #6b7280, #a5b4fc);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crypto-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 40px;
+      background: linear-gradient(145deg, #ffffff, #e0e7ff);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      transition: transform 0.3s ease;
+    }
+    .crypto-container:hover {
+      transform: translateY(-5px);
+    }
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .textareas-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 20px 0;
+      gap: 20px;
+    }
+    .crypto-textarea {
+      width: 48%;
+      min-height: 180px;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #4f46e5;
+      border-radius: 12px;
+      resize: vertical;
+      background-color: #f8fafc;
+      transition: border-color 0.3s ease, transform 0.5s ease, opacity 0.5s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .crypto-textarea:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+    }
+    .input-left {
+      margin-top: -20px;
+    }
+    .input-right {
+      margin-bottom: -20px;
+    }
+    .input-right textarea {
+      pointer-events: none;
+    }
+    .swap-button {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .swap-button:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: translateX(-50%) scale(1.1);
+    }
+    .key-input {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e7ff;
+      text-align: left;
+    }
+    .form-label {
+      color: #1e40af;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .btn-process {
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      transition: background 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .btn-process:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: scale(1.05);
+    }
+    /* Rotor styles (silver gear icon) */
+    .rotors-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 20px 0;
+    }
+    .rotor {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.5s ease;
+    }
+    .rotor:hover {
+      transform: scale(1.05);
+    }
+    .rotor i {
+      font-size: 4rem;
+      color: #C0C0C0; /* Silver color */
+    }
+    .rotor-letter {
+      position: absolute;
+      font-size: 1.2rem;
+      color: #1e40af;
+      font-weight: 600;
+      pointer-events: none;
+    }
+    .rotor-label {
+      text-align: center;
+      margin-top: 10px;
+      color: #1e40af;
+      font-size: 1rem;
+    }
+    /* Divider */
+    .divider {
+      border: 0;
+      height: 1px;
+      background: #e0e7ff;
+      margin: 20px 0;
+    }
+    /* Select fields */
+    .select-container {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      gap: 20px;
+    }
+    .select-container select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #4f46e5;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #f8fafc;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .select-container select:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+    }
+    .select-container select:hover {
+      border-color: #7c3aed;
+    }
+    /* Animation for swapping */
+    .crypto-textarea.swapping-left {
+      transform: translateX(calc(100% + 40px));
+      opacity: 0.7;
+    }
+    .crypto-textarea.swapping-right {
+      transform: translateX(calc(-100% - 40px));
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="crypto-container">
+    <div class="header-container">
+      <h1 style="color: #1e40af; font-weight: 600;">Enigma Cipher Tool</h1>
+      <i class="bi bi-lock-fill" style="font-size: 1.8rem; color: #1e40af;"></i>
+    </div>
+    <form id="enigma-form" method="POST" action="/method/enigma">
+      <div class="textareas-row">
+        <textarea id="input1" name="input1" class="crypto-textarea input-left" placeholder="{{ 'Decrypt here...' if not is_encrypt_mode else 'Encrypt here...' }}">{{ input1 }}</textarea>
+        <button type="submit" name="swap" value="swap" class="swap-button">⇆</button>
+        <textarea id="input2" name="input2" class="crypto-textarea input-right" placeholder="{{ 'Decryption output...' if not is_encrypt_mode else 'Encryption output...' }}" readonly>{{ input2 }}</textarea>
+      </div>
+
+      <!-- Select fields -->
+      <div class="select-container">
+        <div>
+          <label for="rotor1-select" class="form-label">Rotor 1:</label>
+          <select id="rotor1-select" name="rotor1-select">
+            <option value="I" {{ 'selected' if rotor1_select == 'I' else '' }}>I</option>
+            <option value="II" {{ 'selected' if rotor1_select == 'II' else '' }}>II</option>
+            <option value="III" {{ 'selected' if rotor3_select == 'III' else '' }}>III</option>
+            <option value="IV" {{ 'selected' if rotor1_select == 'IV' else '' }}>IV</option>
+            <option value="V" {{ 'selected' if rotor1_select == 'V' else '' }}>V</option>
+          </select>
+        </div>
+        <div>
+          <label for="rotor2-select" class="form-label">Rotor 2:</label>
+          <select id="rotor2-select" name="rotor2-select">
+            <option value="I" {{ 'selected' if rotor2_select == 'I' else '' }}>I</option>
+            <option value="II" {{ 'selected' if rotor2_select == 'II' else '' }}>II</option>
+            <option value="III" {{ 'selected' if rotor2_select == 'III' else '' }}>III</option>
+            <option value="IV" {{ 'selected' if rotor2_select == 'IV' else '' }}>IV</option>
+            <option value="V" {{ 'selected' if rotor2_select == 'V' else '' }}>V</option>
+          </select>
+        </div>
+        <div>
+          <label for="rotor3-select" class="form-label">Rotor 3:</label>
+          <select id="rotor3-select" name="rotor3-select">
+            <option value="I" {{ 'selected' if rotor3_select == 'I' else '' }}>I</option>
+            <option value="II" {{ 'selected' if rotor3_select == 'II' else '' }}>II</option>
+            <option value="III" {{ 'selected' if rotor3_select == 'III' else '' }}>III</option>
+            <option value="IV" {{ 'selected' if rotor3_select == 'IV' else '' }}>IV</option>
+            <option value="V" {{ 'selected' if rotor3_select == 'V' else '' }}>V</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <hr class="divider">
+
+      <!-- Position Rotors -->
+      <h2 style="color: #1e40af; font-weight: 600; text-align: center;">Position Rotors</h2>
+      <div class="rotors-container">
+        <div class="rotor" onclick="rotateRotor(0)">
+          <i class="bi bi-gear-fill"></i>
+          <span class="rotor-letter" id="rotor0-letter">{{ rotor_letters[0] }}</span>
+        </div>
+        <div class="rotor-label">Rotor 1: <span id="rotor0-value">{{ rotor_letters[0] }}</span></div>
+        <div class="rotor" onclick="rotateRotor(1)">
+          <i class="bi bi-gear-fill"></i>
+          <span class="rotor-letter" id="rotor1-letter">{{ rotor_letters[1] }}</span>
+        </div>
+        <div class="rotor-label">Rotor 2: <span id="rotor1-value">{{ rotor_letters[1] }}</span></div>
+        <div class="rotor" onclick="rotateRotor(2)">
+          <i class="bi bi-gear-fill"></i>
+          <span class="rotor-letter" id="rotor2-letter">{{ rotor_letters[2] }}</span>
+        </div>
+        <div class="rotor-label">Rotor 3: <span id="rotor2-value">{{ rotor_letters[2] }}</span></div>
+      </div>
+
+      <!-- Ring Rotors -->
+      <h2 style="color: #1e40af; font-weight: 600; text-align: center;">Ring Rotors</h2>
+      <div class="rotors-container">
+        <div class="rotor" onclick="rotateRingRotor(0)">
+          <i class="bi bi-gear-fill"></i>
+          <span class="rotor-letter" id="ring0-letter">{{ ring_letters[0] }}</span>
+        </div>
+        <div class="rotor-label">Rotor 1: <span id="ring0-value">{{ ring_letters[0] }}</span></div>
+        <div class="rotor" onclick="rotateRingRotor(1)">
+          <i class="bi bi-gear-fill"></i>
+          <span class="rotor-letter" id="ring1-letter">{{ ring_letters[1] }}</span>
+        </div>
+        <div class="rotor-label">Rotor 2: <span id="ring1-value">{{ ring_letters[1] }}</span></div>
+        <div class="rotor" onclick="rotateRingRotor(2)">
+          <i class="bi bi-gear-fill"></i>
+          <span class="rotor-letter" id="ring2-letter">{{ ring_letters[2] }}</span>
+        </div>
+        <div class="rotor-label">Rotor 3: <span id="ring2-value">{{ ring_letters[2] }}</span></div>
+      </div>
+
+      <div class="key-input">
+        <input type="hidden" id="rotor0-pos" name="rotor0_pos" value="{{ rotor_positions[0] }}">
+        <input type="hidden" id="rotor1-pos" name="rotor1_pos" value="{{ rotor_positions[1] }}">
+        <input type="hidden" id="rotor2-pos" name="rotor2_pos" value="{{ rotor_positions[2] }}">
+        <input type="hidden" id="ring0-pos" name="ring0_pos" value="{{ ring_positions[0] }}">
+        <input type="hidden" id="ring1-pos" name="ring1_pos" value="{{ ring_positions[1] }}">
+        <input type="hidden" id="ring2-pos" name="ring2_pos" value="{{ ring_positions[2] }}">
+        <input type="hidden" name="is_encrypt_mode" id="is_encrypt_mode" value="{{ 'true' if is_encrypt_mode else 'false' }}">
+        <button type="submit" name="process" value="process" class="btn btn-process">{{ 'Decrypt' if not is_encrypt_mode else 'Encrypt' }}</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let rotorPositions = {{ rotor_positions | tojson }};
+    let ringPositions = {{ ring_positions | tojson }};
+    let rotationAngles = {{ rotation_angles | tojson }};
+    let ringRotationAngles = {{ ring_rotation_angles | tojson }};
+
+    function rotateRotor(rotorIndex) {
+      rotorPositions[rotorIndex] = (rotorPositions[rotorIndex] + 1) % 26;
+      rotationAngles[rotorIndex] += 360 / 26;
+
+      const rotor = document.getElementsByClassName('rotor')[rotorIndex];
+      rotor.style.transform = `rotate(${rotationAngles[rotorIndex]}deg)`;
+
+      const letter = String.fromCharCode(65 + rotorPositions[rotorIndex]);
+      const letterElement = document.getElementById(`rotor${rotorIndex}-letter`);
+      const angle = (rotorPositions[rotorIndex] * 360 / 26 - 90) * (Math.PI / 180);
+      const radius = 50;
+      const x = radius * Math.cos(angle);
+      const y = radius * Math.sin(angle);
+      letterElement.textContent = letter;
+      letterElement.style.left = `calc(50% + ${x}px)`;
+      letterElement.style.top = `calc(50% + ${y}px)`;
+
+      document.getElementById(`rotor${rotorIndex}-value`).textContent = letter;
+      document.getElementById(`rotor${rotorIndex}-pos`).value = rotorPositions[rotorIndex];
+    }
+
+    function rotateRingRotor(rotorIndex) {
+      ringPositions[rotorIndex] = (ringPositions[rotorIndex] + 1) % 26;
+      ringRotationAngles[rotorIndex] += 360 / 26;
+
+      const rotor = document.getElementsByClassName('rotor')[rotorIndex + 3];
+      rotor.style.transform = `rotate(${ringRotationAngles[rotorIndex]}deg)`;
+
+      const letter = String.fromCharCode(65 + ringPositions[rotorIndex]);
+      const letterElement = document.getElementById(`ring${rotorIndex}-letter`);
+      const angle = (ringPositions[rotorIndex] * 360 / 26 - 90) * (Math.PI / 180);
+      const radius = 50;
+      const x = radius * Math.cos(angle);
+      const y = radius * Math.sin(angle);
+      letterElement.textContent = letter;
+      letterElement.style.left = `calc(50% + ${x}px)`;
+      letterElement.style.top = `calc(50% + ${y}px)`;
+
+      document.getElementById(`ring${rotorIndex}-value`).textContent = letter;
+      document.getElementById(`ring${rotorIndex}-pos`).value = ringPositions[rotorIndex];
+    }
+  </script>
+</body>
+</html>

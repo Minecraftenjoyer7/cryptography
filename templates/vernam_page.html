@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vernam Cipher Tool</title>
+  <link rel="icon" href="data:,"> <!-- Suppress favicon.ico requests -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #6b7280, #a5b4fc);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crypto-container {
+      max-width: 900px;
+      margin: auto;
+      padding: 30px;
+      background: linear-gradient(145deg, #ffffff, #e0e7ff);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 16px;
+      transition: transform 0.3s ease;
+    }
+    .crypto-container:hover {
+      transform: translateY(-5px);
+    }
+    .textareas-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 20px 0;
+    }
+    .crypto-textarea {
+      width: 48%;
+      min-height: 160px;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #4f46e5;
+      border-radius: 12px;
+      resize: vertical;
+      background-color: #f8fafc;
+      transition: border-color 0.3s ease, transform 0.5s ease, opacity 0.5s ease;
+      position: relative;
+    }
+    .crypto-textarea:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    }
+    .input-left {
+      margin-top: -20px;
+    }
+    .input-right {
+      margin-bottom: -20px;
+    }
+    .input-right textarea {
+      pointer-events: none; /* Prevent interaction except viewing */
+    }
+    .swap-button {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .swap-button:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: translateX(-50%) scale(1.1);
+    }
+    .key-input {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e7ff;
+      text-align: left; /* Left-align contents */
+    }
+    .form-label {
+      color: #1e40af;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .keyword-input {
+      width: 100%;
+      padding: 5px;
+      border: 2px solid #4f46e5;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .keyword-input:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    }
+    .btn-process {
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      transition: background 0.3s ease, transform 0.3s ease;
+      display: block;
+    }
+    .btn-process:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: scale(1.05);
+    }
+    .binary-table-container {
+      margin-top: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e7ff;
+      overflow: hidden;
+    }
+    .binary-table-header {
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      padding: 10px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .binary-table-content {
+      max-height: 0;
+      overflow-y: auto;
+      transition: max-height 0.3s ease;
+    }
+    .binary-table-content.open {
+      max-height: 600px; /* Shows all 52 rows */
+    }
+    .binary-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .binary-table th, .binary-table td {
+      border: 1px solid #4f46e5;
+      padding: 6px;
+      text-align: center;
+      font-size: 0.85rem;
+      background-color: #f8fafc;
+    }
+    .binary-table th {
+      background-color: #e0e7ff;
+      color: #1e40af;
+      font-weight: 600;
+    }
+    .chevron {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    .chevron.open {
+      transform: rotate(180deg);
+    }
+    /* Animation for swapping */
+    .crypto-textarea.swapping-left {
+      transform: translateX(calc(100% + 40px));
+      opacity: 0.7;
+    }
+    .crypto-textarea.swapping-right {
+      transform: translateX(calc(-100% - 40px));
+      opacity: 0.7;
+    }
+
+
+
+
+          .previous-cipher-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: linear-gradient(145deg, #ffffff, #e0e7ff);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    border: 1px solid #e0e7ff;
+    text-align: center;
+  }
+  .previous-cipher-header {
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  .previous-cipher-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .previous-cipher-label {
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  .previous-cipher-input {
+    width: 100%;
+    max-width: 500px;
+    background-color: #f8fafc;
+    border: 2px solid #4f46e5;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    color: #1e293b;
+  }
+  .previous-cipher-input:disabled {
+    opacity: 0.7;
+  }
+  </style>
+</head>
+<body>
+  <div class="crypto-container">
+    <h1 class="text-center mb-4" style="color: #1e40af; font-weight: 600;">Vernam Cipher Tool</h1>
+    <form method="POST" action="{{ url_for('vernam') }}">
+      <div class="textareas-row">
+        <textarea id="input1" name="input1" class="crypto-textarea input-left" placeholder="{{ 'Encrypt here...' if is_encrypt_mode else 'Decrypt here...' }}">{{ input_text }}</textarea>
+        <button type="button" class="swap-button" onclick="swapInputs()">⇆</button>
+        <textarea id="input2" name="input2" class="crypto-textarea input-right" placeholder="{{ 'Encryption output...' if is_encrypt_mode else 'Decryption output...' }}" readonly>{{ output }}</textarea>
+      </div>
+
+      <div class="key-input">
+        <label for="keyword" class="form-label">Key:</label>
+        <input type="text" id="keyword" name="keyword" class="keyword-input" placeholder="Enter key" value="{{ keyword if keyword is not none else '' }}">
+        <input type="hidden" name="is_encrypt_mode" id="is_encrypt_mode" value="{{ 'true' if is_encrypt_mode else 'false' }}">
+        <button type="submit" class="btn btn-process">{{ 'Encrypt' if is_encrypt_mode else 'Decrypt' }}</button>
+      </div>
+    </form>
+
+    <!-- Binary Alphabet Table -->
+    <div class="binary-table-container">
+      <div class="binary-table-header" onclick="toggleTable()">
+        Alphabet to Binary
+        <span class="chevron">▼</span>
+      </div>
+      <div class="binary-table-content">
+        <table class="binary-table">
+          <thead>
+            <tr>
+              <th>Letter</th>
+              <th>Binary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>01000001</td></tr>
+            <tr><td>B</td><td>01000010</td></tr>
+            <tr><td>C</td><td>01000011</td></tr>
+            <tr><td>D</td><td>01000100</td></tr>
+            <tr><td>E</td><td>01000101</td></tr>
+            <tr><td>F</td><td>01000110</td></tr>
+            <tr><td>G</td><td>01000111</td></tr>
+            <tr><td>H</td><td>01001000</td></tr>
+            <tr><td>I</td><td>01001001</td></tr>
+            <tr><td>J</td><td>01001010</td></tr>
+            <tr><td>K</td><td>01001011</td></tr>
+            <tr><td>L</td><td>01001100</td></tr>
+            <tr><td>M</td><td>01001101</td></tr>
+            <tr><td>N</td><td>01001110</td></tr>
+            <tr><td>O</td><td>01001111</td></tr>
+            <tr><td>P</td><td>01010000</td></tr>
+            <tr><td>Q</td><td>01010001</td></tr>
+            <tr><td>R</td><td>01010010</td></tr>
+            <tr><td>S</td><td>01010011</td></tr>
+            <tr><td>T</td><td>01010100</td></tr>
+            <tr><td>U</td><td>01010101</td></tr>
+            <tr><td>V</td><td>01010110</td></tr>
+            <tr><td>W</td><td>01010111</td></tr>
+            <tr><td>X</td><td>01011000</td></tr>
+            <tr><td>Y</td><td>01011001</td></tr>
+            <tr><td>Z</td><td>01011010</td></tr>
+            <tr><td>a</td><td>01100001</td></tr>
+            <tr><td>b</td><td>01100010</td></tr>
+            <tr><td>c</td><td>01100011</td></tr>
+            <tr><td>d</td><td>01100100</td></tr>
+            <tr><td>e</td><td>01100101</td></tr>
+            <tr><td>f</td><td>01100110</td></tr>
+            <tr><td>g</td><td>01100111</td></tr>
+            <tr><td>h</td><td>01101000</td></tr>
+            <tr><td>i</td><td>01101001</td></tr>
+            <tr><td>j</td><td>01101010</td></tr>
+            <tr><td>k</td><td>01101011</td></tr>
+            <tr><td>l</td><td>01101100</td></tr>
+            <tr><td>m</td><td>01101101</td></tr>
+            <tr><td>n</td><td>01101110</td></tr>
+            <tr><td>o</td><td>01101111</td></tr>
+            <tr><td>p</td><td>01110000</td></tr>
+            <tr><td>q</td><td>01110001</td></tr>
+            <tr><td>r</td><td>01110010</td></tr>
+            <tr><td>s</td><td>01110011</td></tr>
+            <tr><td>t</td><td>01110100</td></tr>
+            <tr><td>u</td><td>01110101</td></tr>
+            <tr><td>v</td><td>01110110</td></tr>
+            <tr><td>w</td><td>01110111</td></tr>
+            <tr><td>x</td><td>01111000</td></tr>
+            <tr><td>y</td><td>01111001</td></tr>
+            <tr><td>z</td><td>01111010</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if previous_cipher != "" %}
+    <div style="margin-top:30px;" class="previous-cipher-container">
+    <h2 class="previous-cipher-header">Want to add more layers of security?</h2>
+    <div class="previous-cipher-input-wrapper">
+    <label for="previousCipherInput" class="previous-cipher-label">Previous Encrypted Text:</label>
+    <input type="text" id="previousCipherInput" class="form-control previous-cipher-input" value="{{ previous_cipher }}" readonly>
+    </div>
+    </div>
+{% endif %}
+  </div>
+
+  <script>
+    let isEncryptMode = {{ 'true' if is_encrypt_mode else 'false' }};
+
+    function swapInputs() {
+      const input1 = document.getElementById('input1');
+      const input2 = document.getElementById('input2');
+      const isEncryptModeInput = document.getElementById('is_encrypt_mode');
+      const processButton = document.querySelector('.btn-process');
+
+      // Add swapping classes for animation
+      input1.classList.add('swapping-left');
+      input2.classList.add('swapping-right');
+
+      // Delay to allow animation to play
+      setTimeout(() => {
+        input1.value = '';
+        input2.value = '';
+        // Toggle placeholders and button text based on mode
+        if (isEncryptMode) {
+          input1.placeholder = 'Decrypt here...';
+          input2.placeholder = 'Decryption output...';
+          processButton.textContent = 'Decrypt';
+          isEncryptModeInput.value = 'false';
+        } else {
+          input1.placeholder = 'Encrypt here...';
+          input2.placeholder = 'Encryption output...';
+          processButton.textContent = 'Encrypt';
+          isEncryptModeInput.value = 'true';
+        }
+
+        // Toggle mode
+        isEncryptMode = !isEncryptMode;
+
+        // Remove animation classes
+        input1.classList.remove('swapping-left');
+        input2.classList.remove('swapping-right');
+      }, 500);
+    }
+
+    // Toggle table visibility
+    function toggleTable() {
+      const content = document.querySelector('.binary-table-content');
+      const chevron = document.querySelector('.chevron');
+      content.classList.toggle('open');
+      chevron.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

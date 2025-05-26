@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monoalphabetic Cipher Tool</title>
+  <link rel="icon" href="data:,"> <!-- Suppress favicon.ico requests -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #6b7280, #a5b4fc);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crypto-container {
+      max-width: 900px;
+      margin: auto;
+      padding: 30px;
+      background: linear-gradient(145deg, #ffffff, #e0e7ff);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 16px;
+      transition: transform 0.3s ease;
+    }
+    .crypto-container:hover {
+      transform: translateY(-5px);
+    }
+    .textareas-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 20px 0;
+    }
+    .crypto-textarea {
+      width: 48%;
+      min-height: 160px;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #4f46e5;
+      border-radius: 12px;
+      resize: vertical;
+      background-color: #f8fafc;
+      transition: border-color 0.3s ease, transform 0.5s ease, opacity 0.5s ease;
+      position: relative;
+    }
+    .crypto-textarea:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    }
+    .input-left {
+      margin-top: -20px;
+    }
+    .input-right {
+      margin-bottom: -20px;
+    }
+    .input-right textarea {
+      pointer-events: none; /* Prevent interaction except viewing */
+    }
+    .swap-button {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .swap-button:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: translateX(-50%) scale(1.1);
+    }
+    .key-input {
+      margin-top: 40px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e0e7ff;
+    }
+    .form-label {
+      color: #1e40af;
+      font-weight: 600;
+    }
+    .btn-process {
+      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .btn-process:hover {
+      background: linear-gradient(45deg, #7c3aed, #4f46e5);
+      transform: scale(1.05);
+    }
+    .key-table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .key-table td {
+      border: 1px solid #4f46e5;
+      padding: 4px;
+      text-align: center;
+      font-size: 0.9rem;
+      background-color: #f8fafc;
+      width: 3.85%; /* 100% / 26 */
+    }
+    .key-table tr:first-child td {
+      background-color: #e0e7ff;
+      color: #1e40af;
+      font-weight: 600;
+    }
+    .key-input-field {
+      width: 100%;
+      padding: 2px;
+      border: 2px solid #4f46e5;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      background-color: #fff;
+    }
+    .key-input-field:focus {
+      border-color: #7c3aed;
+      outline: none;
+      box-shadow: 0 0 4px rgba(124, 58, 237, 0.3);
+    }
+    .key-input-field.invalid {
+      border-color: #dc3545;
+    }
+    /* Animation for swapping */
+    .crypto-textarea.swapping-left {
+      transform: translateX(calc(100% + 40px));
+      opacity: 0.7;
+    }
+    .crypto-textarea.swapping-right {
+      transform: translateX(calc(-100% - 40px));
+      opacity: 0.7;
+    }
+
+
+          .previous-cipher-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: linear-gradient(145deg, #ffffff, #e0e7ff);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    border: 1px solid #e0e7ff;
+    text-align: center;
+  }
+  .previous-cipher-header {
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  .previous-cipher-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .previous-cipher-label {
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  .previous-cipher-input {
+    width: 100%;
+    max-width: 500px;
+    background-color: #f8fafc;
+    border: 2px solid #4f46e5;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 1rem;
+    color: #1e293b;
+  }
+  .previous-cipher-input:disabled {
+    opacity: 0.7;
+  }
+  </style>
+</head>
+<body>
+  <div class="crypto-container">
+    <h1 class="text-center mb-4" style="color: #1e40af; font-weight: 600;">Monoalphabetic Cipher Tool</h1>
+    <form method="POST" action="{{ url_for('monoalphabetic') }}">
+      <div class="textareas-row">
+        <textarea id="input1" name="input1" class="crypto-textarea input-left" placeholder="{{ 'Encrypt here...' if is_encrypt_mode else 'Decrypt here...' }}">{{ input_text }}</textarea>
+        <button type="button" class="swap-button" onclick="swapInputs()">⇆</button>
+        <textarea id="input2" name="input2" class="crypto-textarea input-right" placeholder="{{ 'Encryption output...' if is_encrypt_mode else 'Decryption output...' }}" readonly>{{ output }}</textarea>
+      </div>
+
+      <div class="key-input">
+        <label class="form-label">Substitution Key:</label>
+        <table class="key-table">
+          <tr>
+            <td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td><td>G</td><td>H</td><td>I</td><td>J</td>
+            <td>K</td><td>L</td><td>M</td><td>N</td><td>O</td><td>P</td><td>Q</td><td>R</td><td>S</td><td>T</td>
+            <td>U</td><td>V</td><td>W</td><td>X</td><td>Y</td><td>Z</td>
+          </tr>
+          <tr>
+            <td><input type="text" name="key_A" class="key-input-field" maxlength="1" value="{{ key['A'] if key and 'A' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_B" class="key-input-field" maxlength="1" value="{{ key['B'] if key and 'B' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_C" class="key-input-field" maxlength="1" value="{{ key['C'] if key and 'C' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_D" class="key-input-field" maxlength="1" value="{{ key['D'] if key and 'D' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_E" class="key-input-field" maxlength="1" value="{{ key['E'] if key and 'E' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_F" class="key-input-field" maxlength="1" value="{{ key['F'] if key and 'F' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_G" class="key-input-field" maxlength="1" value="{{ key['G'] if key and 'G' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_H" class="key-input-field" maxlength="1" value="{{ key['H'] if key and 'H' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_I" class="key-input-field" maxlength="1" value="{{ key['I'] if key and 'I' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_J" class="key-input-field" maxlength="1" value="{{ key['J'] if key and 'J' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_K" class="key-input-field" maxlength="1" value="{{ key['K'] if key and 'K' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_L" class="key-input-field" maxlength="1" value="{{ key['L'] if key and 'L' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_M" class="key-input-field" maxlength="1" value="{{ key['M'] if key and 'M' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_N" class="key-input-field" maxlength="1" value="{{ key['N'] if key and 'N' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_O" class="key-input-field" maxlength="1" value="{{ key['O'] if key and 'O' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_P" class="key-input-field" maxlength="1" value="{{ key['P'] if key and 'P' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_Q" class="key-input-field" maxlength="1" value="{{ key['Q'] if key and 'Q' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_R" class="key-input-field" maxlength="1" value="{{ key['R'] if key and 'R' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_S" class="key-input-field" maxlength="1" value="{{ key['S'] if key and 'S' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_T" class="key-input-field" maxlength="1" value="{{ key['T'] if key and 'T' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_U" class="key-input-field" maxlength="1" value="{{ key['U'] if key and 'U' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_V" class="key-input-field" maxlength="1" value="{{ key['V'] if key and 'V' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_W" class="key-input-field" maxlength="1" value="{{ key['W'] if key and 'W' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_X" class="key-input-field" maxlength="1" value="{{ key['X'] if key and 'X' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_Y" class="key-input-field" maxlength="1" value="{{ key['Y'] if key and 'Y' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+            <td><input type="text" name="key_Z" class="key-input-field" maxlength="1" value="{{ key['Z'] if key and 'Z' in key else '' }}" oninput="validateKeyInput(this)" required></td>
+          </tr>
+        </table>
+        <input type="hidden" name="is_encrypt_mode" id="is_encrypt_mode" value="{{ 'true' if is_encrypt_mode else 'false' }}">
+        <button type="submit" class="btn btn-process mt-3">{{ 'Encrypt' if is_encrypt_mode else 'Decrypt' }}</button>
+      </div>
+    </form>
+    {% if previous_cipher != "" %}
+      <div style="margin-top:30px;" class="previous-cipher-container">
+      <h2 class="previous-cipher-header">Want to add more layers of security?</h2>
+      <div class="previous-cipher-input-wrapper">
+      <label for="previousCipherInput" class="previous-cipher-label">Previous Encrypted Text:</label>
+      <input type="text" id="previousCipherInput" class="form-control previous-cipher-input" value="{{ previous_cipher }}" readonly>
+      </div>
+    </div>
+  {% endif %}
+  </div>
+
+  <script>
+    let isEncryptMode = {{ 'true' if is_encrypt_mode else 'false' }};
+
+    function swapInputs() {
+      const input1 = document.getElementById('input1');
+      const input2 = document.getElementById('input2');
+      const isEncryptModeInput = document.getElementById('is_encrypt_mode');
+      const processButton = document.querySelector('.btn-process');
+
+      // Add swapping classes for animation
+      input1.classList.add('swapping-left');
+      input2.classList.add('swapping-right');
+
+      // Delay to allow animation to play
+      setTimeout(() => {
+        input1.value = '';
+        input2.value = '';
+        // Toggle placeholders and button text based on mode
+        if (isEncryptMode) {
+          input1.placeholder = 'Decrypt here...';
+          input2.placeholder = 'Decryption output...';
+          processButton.textContent = 'Decrypt';
+          isEncryptModeInput.value = 'false';
+        } else {
+          input1.placeholder = 'Encrypt here...';
+          input2.placeholder = 'Encryption output...';
+          processButton.textContent = 'Encrypt';
+          isEncryptModeInput.value = 'true';
+        }
+
+        // Toggle mode
+        isEncryptMode = !isEncryptMode;
+
+        // Remove animation classes
+        input1.classList.remove('swapping-left');
+        input2.classList.remove('swapping-right');
+      }, 500);
+    }
+
+    function validateKeyInput(input) {
+      // Store original value to restore if invalid
+      const originalValue = input.value;
+      // Convert to uppercase and ensure single letter
+      input.value = input.value.toUpperCase().replace(/[^A-Z]/g, '');
+      if (input.value.length > 1) {
+        input.value = input.value[0];
+      }
+
+      // Check for duplicates
+      const allInputs = document.querySelectorAll('.key-input-field');
+      const values = Array.from(allInputs)
+        .map(inp => inp.value.toUpperCase())
+        .filter(val => val !== '');
+      const uniqueValues = new Set(values);
+
+      if (values.length !== uniqueValues.size) {
+        // Duplicate found, revert to empty or previous valid value
+        input.value = '';
+        input.classList.add('invalid');
+        input.title = 'Letter already used';
+        setTimeout(() => {
+          input.classList.remove('invalid');
+          input.title = '';
+        }, 1000); // Remove red border after 1s
+      } else {
+        // Valid input, remove invalid class from all
+        allInputs.forEach(inp => {
+          inp.classList.remove('invalid');
+          inp.title = '';
+        });
+      }
+    }
+  </script>
+</body>
+</html>
